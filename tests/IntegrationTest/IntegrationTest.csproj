@@ -26,8 +26,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7" />
     <PackageReference Include="Testcontainers" Version="3.8.0" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="3.8.0" />
-    <PackageReference Include="Bogus" Version="35.3.0" />
+    <PackageReference Include="Bogus" Version="35.6.3" />
     <PackageReference Include="ReportGenerator" Version="5.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AdminService\AdminService.csproj" />
@@ -36,6 +38,9 @@
   
   <ItemGroup>
     <None Include="Postman\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="appsettings.IntegrationTest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
