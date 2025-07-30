@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: adminservice-postgres
+    environment:
+      POSTGRES_DB: adminservice
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - admin-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: adminservice-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - admin-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: adminservice-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - admin-network
+
+  # Loki (Log aggregation)
+  loki:
+    image: grafana/loki:3.4.1
+    container_name: adminservice-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - admin-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: adminservice-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - loki
+    networks:
+      - admin-network
+
+  # Admin Service API
+  adminservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adminservice
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=adminservice;Username=postgres;Password=password
+      - ConnectionStrings__Redis=redis:6379
+      - Serilog__Loki__Uri=http://loki:3100
+    depends_on:
+      - postgres
+      - redis
+      - loki
+    networks:
+      - admin-network
+
+  # Database Migrations with Flyway (runs once and exits)
+  migrations:
+    image: flyway/flyway:latest
+    container_name: adminservice-migrations
+    volumes:
+      - ./sql/migrations:/flyway/sql
+    command: >
+      -url=jdbc:postgresql://postgres:5432/adminservice
+      -user=postgres
+      -password=password
+      -locations=filesystem:/flyway/sql
+      migrate
+    depends_on:
+      - postgres
+    networks:
+      - admin-network
+
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+
+networks:
+  admin-network:
+    driver: bridge 

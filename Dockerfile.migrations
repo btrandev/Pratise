@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["src/AdminService.Migrations/AdminService.Migrations.csproj", "src/AdminService.Migrations/"]
+COPY ["src/AdminService/AdminService.csproj", "src/AdminService/"]
+RUN dotnet restore "src/AdminService.Migrations/AdminService.Migrations.csproj"
+COPY . .
+WORKDIR "/src/src/AdminService.Migrations"
+RUN dotnet build "AdminService.Migrations.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "AdminService.Migrations.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "AdminService.Migrations.dll"] 

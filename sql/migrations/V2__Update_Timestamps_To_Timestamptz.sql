@@ -1,0 +1,18 @@
+-- V2__Update_Timestamps_To_Timestamptz.sql
+-- Migration to update all TIMESTAMP columns to TIMESTAMP WITH TIME ZONE (timestamptz)
+
+-- Tenants table
+ALTER TABLE "Tenants"
+    ALTER COLUMN "CreatedAt" TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN "UpdatedAt" TYPE TIMESTAMP WITH TIME ZONE;
+
+-- Users table
+ALTER TABLE "Users"
+    ALTER COLUMN "LastLoginAt" TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN "CreatedAt" TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN "UpdatedAt" TYPE TIMESTAMP WITH TIME ZONE;
+
+-- UserClaims table
+ALTER TABLE "UserClaims"
+    ALTER COLUMN "CreatedAt" TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN "UpdatedAt" TYPE TIMESTAMP WITH TIME ZONE;
