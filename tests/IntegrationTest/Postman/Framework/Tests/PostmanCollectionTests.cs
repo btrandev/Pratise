@@ -29,6 +29,7 @@ namespace IntegrationTest.Postman.Framework.Tests
             {
                 // Configure server to listen on port 5000
                 builder.UseUrls("http://localhost:5000");
+                builder.UseEnvironment("Test");
                 
                 builder.ConfigureServices(services =>
                 {

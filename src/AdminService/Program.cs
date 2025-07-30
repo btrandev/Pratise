@@ -18,7 +18,7 @@ builder.Services
     .AddApiServices()
     .AddStandardMiddlewareServices()
     .AddValidationServices()
-    .AddInfrastructureServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration, builder.Environment.EnvironmentName)
     .AddAuthenticationServices(builder.Configuration)
     .AddMediatrServices()
     .AddRepositories()

@@ -3,15 +3,24 @@ using AdminService.Infrastructure.Data;
 using Common.Middleware.Authorization;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace AdminService.Infrastructure.Extensions;
 
 public static class InfrastructureServiceExtensions
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration, string environmentName)
     {
         // Database
-        services.AddDbContext<AdminServiceDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        if (environmentName == "Test")
+        {
+            services.AddDbContext<AdminServiceDbContext>(options =>
+                options.UseInMemoryDatabase("TestDb"));
+        }
+        else
+        {
+            services.AddDbContext<AdminServiceDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        }
 
         // AutoMapper configuration
         services.AddAutoMapper(cfg =>

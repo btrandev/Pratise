@@ -90,9 +90,11 @@ namespace IntegrationTest.Postman.Framework.Tests
             // Seed admin user for testing
             if (!context.Users.Any())
             {
+                // Create a user
+                var userId = Guid.NewGuid();
                 context.Users.Add(new AdminService.Domain.Entities.User
                 {
-                    Id = Guid.NewGuid(),
+                    Id = userId,
                     Email = "admin@system.local",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), // Make sure to add BCrypt.Net-Next NuGet package
                     FirstName = "Admin",
@@ -110,9 +112,46 @@ namespace IntegrationTest.Postman.Framework.Tests
                         Description = "Default tenant for testing"
                     });
                 }
+
+                // Add user claims for permissions
+                var systemUserId = "00000000-0000-0000-0000-000000000001";
+                var createdAt = DateTime.UtcNow;
+                
+                // User permission claims
+                AddUserClaim(context, userId, "permission", "Users.View", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Users.Create", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Users.Update", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Users.Delete", systemUserId, createdAt);
+                
+                // Tenant permission claims
+                AddUserClaim(context, userId, "permission", "Tenants.View", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Tenants.Create", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Tenants.Update", systemUserId, createdAt);
+                AddUserClaim(context, userId, "permission", "Tenants.Delete", systemUserId, createdAt);
                 
                 context.SaveChanges();
             }
+        }
+
+        private void AddUserClaim(
+            AdminServiceDbContext context, 
+            Guid userId, 
+            string claimType, 
+            string claimValue, 
+            string createdById, 
+            DateTime createdAt)
+        {
+            context.UserClaims.Add(new AdminService.Domain.Entities.UserClaim
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                ClaimType = claimType,
+                ClaimValue = claimValue,
+                CreatedAt = createdAt,
+                CreatedById = Guid.Parse(createdById),
+                CreatedByName = "system",
+                IsDeleted = false
+            });
         }
     }
 }

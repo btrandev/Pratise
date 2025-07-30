@@ -43,6 +43,22 @@ namespace IntegrationTest.Postman.Framework
             });
         }
 
+        public Dictionary<string, string> ResolveHeaders(Dictionary<string, string> headers)
+        {
+            if (headers == null)
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var resolvedHeaders = new Dictionary<string, string>();
+            foreach (var header in headers)
+            {
+                resolvedHeaders[ResolveVariables(header.Key)] = ResolveVariables(header.Value);
+            }
+
+            return resolvedHeaders;
+        }
+
         public void SetVariable(string name, string value)
         {
             _variables[name] = value;
