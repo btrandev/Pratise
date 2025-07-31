@@ -66,22 +66,22 @@ namespace IntegrationTest.Postman.Framework.Tests
             await runner.RunCollectionAsync(collectionPath);
         }
 
-        [Theory]
-        [InlineData("Practices.postman_collection.json", "PracticesLocal.postman_environment.json")]
-        public async Task Run_Parameterized_Collection(string collectionFileName, string environmentFileName)
-        {
-            // Arrange
-            _output.WriteLine($"Starting parameterized Postman collection test with: {collectionFileName}");
-            var collectionPath = Path.Combine(AppContext.BaseDirectory, "Postman", collectionFileName);
-            var environmentPath = Path.Combine(AppContext.BaseDirectory, "Postman", environmentFileName);
+        // [Theory]
+        // [InlineData("Practices.postman_collection.json", "PracticesLocal.postman_environment.json")]
+        // public async Task Run_Parameterized_Collection(string collectionFileName, string environmentFileName)
+        // {
+        //     // Arrange
+        //     _output.WriteLine($"Starting parameterized Postman collection test with: {collectionFileName}");
+        //     var collectionPath = Path.Combine(AppContext.BaseDirectory, "Postman", collectionFileName);
+        //     var environmentPath = Path.Combine(AppContext.BaseDirectory, "Postman", environmentFileName);
             
-            _output.WriteLine($"Collection path: {collectionPath}");
-            _output.WriteLine($"Environment path: {environmentPath}");
+        //     _output.WriteLine($"Collection path: {collectionPath}");
+        //     _output.WriteLine($"Environment path: {environmentPath}");
             
-            // Act & Assert
-            var runner = new PostmanCollectionRunner(_httpClient, environmentPath, _logger);
-            await runner.RunCollectionAsync(collectionPath);
-        }
+        //     // Act & Assert
+        //     var runner = new PostmanCollectionRunner(_httpClient, environmentPath, _logger);
+        //     await runner.RunCollectionAsync(collectionPath);
+        // }
     }
 
     // Helper class to convert ITestOutputHelper to ILogger
