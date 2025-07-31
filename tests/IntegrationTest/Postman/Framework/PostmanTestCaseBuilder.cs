@@ -4,20 +4,23 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using IntegrationTest.Postman.Framework.Models;
+using Microsoft.Extensions.Logging;
 
 namespace IntegrationTest.Postman.Framework
 {
     public class PostmanTestCaseBuilder
     {
         private readonly PostmanEnvironmentResolver _environmentResolver;
+        private readonly ILogger? _logger;
         private static readonly Regex StatusCodeRegex = new(@"pm\.response\.to\.have\.status\((\d+)\)", RegexOptions.Compiled);
         private static readonly Regex JsonPropertyExistsRegex = new(@"pm\.expect\(response\.([^)]+)\)\.to\.exist", RegexOptions.Compiled);
         private static readonly Regex JsonPropertyTypeRegex = new(@"pm\.expect\(response\.([^)]+)\)\.to\.be\.a\('([^']+)'\)", RegexOptions.Compiled);
         private static readonly Regex EnvironmentSetRegex = new(@"pm\.environment\.set\(""([^""]+)"",\s*response\.([^)]+)\)", RegexOptions.Compiled);
 
-        public PostmanTestCaseBuilder(PostmanEnvironmentResolver environmentResolver)
+        public PostmanTestCaseBuilder(PostmanEnvironmentResolver environmentResolver, ILogger? logger)
         {
             _environmentResolver = environmentResolver;
+            _logger = logger;
         }
 
         public async Task ExecuteTestsAsync(List<string> testScripts, HttpResponseMessage response)
@@ -39,6 +42,7 @@ namespace IntegrationTest.Postman.Framework
             {
                 if (match.Success && int.TryParse(match.Groups[1].Value, out int expectedStatus))
                 {
+                    _logger?.LogInformation("Asserting status code: {ExpectedStatus}", expectedStatus);
                     response.StatusCode.Should().Be((HttpStatusCode)expectedStatus);
                 }
             }
@@ -51,6 +55,7 @@ namespace IntegrationTest.Postman.Framework
                 {
                     string propertyPath = match.Groups[1].Value;
                     var jsonElement = _environmentResolver.ExtractJsonValue(responseBody, propertyPath);
+                    _logger?.LogInformation("Asserting JSON property exists: {PropertyPath}", propertyPath);
                     jsonElement.Should().NotBeNull($"Property '{propertyPath}' should exist");
                 }
             }
@@ -65,10 +70,12 @@ namespace IntegrationTest.Postman.Framework
                     string expectedType = match.Groups[2].Value;
 
                     var jsonElement = _environmentResolver.ExtractJsonValue(responseBody, propertyPath);
+                    _logger?.LogInformation("Asserting JSON property type: {PropertyPath} should be {ExpectedType}", propertyPath, expectedType);
                     jsonElement.Should().NotBeNull($"Property '{propertyPath}' should exist");
 
                     if (jsonElement.HasValue)
                     {
+                        _logger?.LogInformation("Checking JSON property value kind for {PropertyPath}", propertyPath);
                         switch (expectedType.ToLower())
                         {
                             case "string":

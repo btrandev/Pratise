@@ -11,8 +11,7 @@ public static class CreateUserEndpoint
 {
     public static IEndpointRouteBuilder MapCreateUserEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/api/users", 
-            [Authorize(Roles = "Admin")]
+        endpoints.MapPost("/api/users",
             async (IMediator mediator, [FromBody] CreateUserRequest request) =>
             {
                 var result = await mediator.Send(new CreateUserCommand(request));

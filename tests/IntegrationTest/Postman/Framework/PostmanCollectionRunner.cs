@@ -18,7 +18,7 @@ namespace IntegrationTest.Postman.Framework
             _httpClient = httpClient;
             _logger = logger;
             _environmentResolver = new PostmanEnvironmentResolver(environment);
-            _testCaseBuilder = new PostmanTestCaseBuilder(_environmentResolver);
+            _testCaseBuilder = new PostmanTestCaseBuilder(_environmentResolver, _logger);
         }
 
         public PostmanCollectionRunner(HttpClient httpClient, string environmentFilePath, ILogger? logger = null)
@@ -70,7 +70,7 @@ namespace IntegrationTest.Postman.Framework
 
             var request = item.Request;
             var url = _environmentResolver.ResolveVariables(request.Url?.Raw ?? string.Empty);
-            
+
             if (string.IsNullOrEmpty(url))
             {
                 _logger?.LogError("URL is empty for request {RequestName}", item.Name);
@@ -90,6 +90,24 @@ namespace IntegrationTest.Postman.Framework
                         var resolvedValue = _environmentResolver.ResolveVariables(header.Value);
                         httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, resolvedValue);
                     }
+                }
+            }
+
+            var resolvedAuth = _environmentResolver.ResolveAuth(request.Auth);
+            if (!string.IsNullOrEmpty(resolvedAuth))
+            {
+                if (resolvedAuth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", resolvedAuth.Substring(7));
+                }
+                else if (resolvedAuth.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+                {
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", resolvedAuth.Substring(6));
+                }
+                else
+                {
+                    // Assume Bearer if no scheme is specified
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", resolvedAuth);
                 }
             }
 
@@ -143,7 +161,7 @@ namespace IntegrationTest.Postman.Framework
             {
                 _logger?.LogInformation("Sending {Method} request to {Url}", httpMethod, url);
                 var response = await _httpClient.SendAsync(httpRequestMessage);
-                
+
                 _logger?.LogInformation("Response status code: {StatusCode}", response.StatusCode);
 
                 // Execute tests
@@ -154,6 +172,7 @@ namespace IntegrationTest.Postman.Framework
 
                 if (testScripts != null && testScripts.Any())
                 {
+                    _logger?.LogInformation("Executing tests {TestScript} {Response}", string.Join(Environment.NewLine, testScripts), await response.Content.ReadAsStringAsync());
                     await _testCaseBuilder.ExecuteTestsAsync(testScripts, response);
                 }
             }
@@ -167,14 +186,14 @@ namespace IntegrationTest.Postman.Framework
         private static PostmanCollection LoadCollectionFromFile(string filePath)
         {
             var json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<PostmanCollection>(json) 
+            return JsonSerializer.Deserialize<PostmanCollection>(json)
                 ?? throw new InvalidOperationException("Failed to deserialize Postman collection");
         }
 
         private static PostmanEnvironment LoadEnvironmentFromFile(string filePath)
         {
             var json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<PostmanEnvironment>(json) 
+            return JsonSerializer.Deserialize<PostmanEnvironment>(json)
                 ?? throw new InvalidOperationException("Failed to deserialize Postman environment");
         }
     }

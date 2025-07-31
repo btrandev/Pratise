@@ -1,3 +1,4 @@
+using System.Buffers.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Bogus;
@@ -43,20 +44,49 @@ namespace IntegrationTest.Postman.Framework
             });
         }
 
-        public Dictionary<string, string> ResolveHeaders(Dictionary<string, string> headers)
+        public string ResolveAuth(PostmanAuth auth)
         {
-            if (headers == null)
+            if (auth == null)
             {
-                return new Dictionary<string, string>();
+                return null;
             }
 
-            var resolvedHeaders = new Dictionary<string, string>();
-            foreach (var header in headers)
+            // Handle Bearer token auth
+            if (auth.Type == "bearer" && auth.Bearer != null)
             {
-                resolvedHeaders[ResolveVariables(header.Key)] = ResolveVariables(header.Value);
+                var resolvedBearer = new List<PostmanAuthParam>();
+                foreach (var param in auth.Bearer)
+                {
+                    resolvedBearer.Add(new PostmanAuthParam
+                    {
+                        Key = param.Key,
+                        Value = ResolveVariables(param.Value),
+                        Type = param.Type
+                    });
+                }
+                return $"Bearer {string.Join(" ", resolvedBearer.Select(p => p.Value))}";
             }
 
-            return resolvedHeaders;
+            // Handle Basic auth
+            if (auth.Type == "basic" && auth.Basic != null)
+            {
+                var resolvedBasic = new List<PostmanAuthParam>();
+                foreach (var param in auth.Basic)
+                {
+                    resolvedBasic.Add(new PostmanAuthParam
+                    {
+                        Key = param.Key,
+                        Value = ResolveVariables(param.Value),
+                        Type = param.Type
+                    });
+                    // Convert to Base64 using Convert.ToBase64String
+                    string authString = string.Join(":", resolvedBasic.Select(p => p.Value));
+                    string base64Auth = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(authString));
+                    return $"Basic {base64Auth}";
+                }
+            }
+            // Add other auth types as needed (apikey, oauth2, etc.)
+            return string.Empty;
         }
 
         public void SetVariable(string name, string value)

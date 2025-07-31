@@ -6,7 +6,7 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("info")]
         public PostmanInfo? Info { get; set; }
-        
+
         [JsonPropertyName("item")]
         public List<PostmanItem>? Items { get; set; }
     }
@@ -15,10 +15,10 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("_postman_id")]
         public string? Id { get; set; }
-        
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
-        
+
         [JsonPropertyName("schema")]
         public string? Schema { get; set; }
     }
@@ -27,13 +27,13 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
-        
+
         [JsonPropertyName("item")]
         public List<PostmanItem>? Items { get; set; }
-        
+
         [JsonPropertyName("request")]
         public PostmanRequest? Request { get; set; }
-        
+
         [JsonPropertyName("event")]
         public List<PostmanEvent>? Events { get; set; }
 
@@ -45,25 +45,28 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("method")]
         public string? Method { get; set; }
-        
+
         [JsonPropertyName("header")]
         public List<PostmanHeader>? Headers { get; set; }
-        
+
         [JsonPropertyName("body")]
         public PostmanBody? Body { get; set; }
-        
+
         [JsonPropertyName("url")]
         public PostmanUrl? Url { get; set; }
+
+        [JsonPropertyName("auth")]
+        public PostmanAuth? Auth { get; set; }
     }
 
     public class PostmanHeader
     {
         [JsonPropertyName("key")]
         public string? Key { get; set; }
-        
+
         [JsonPropertyName("value")]
         public string? Value { get; set; }
-        
+
         [JsonPropertyName("disabled")]
         public bool? Disabled { get; set; }
     }
@@ -72,13 +75,13 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("mode")]
         public string? Mode { get; set; }
-        
+
         [JsonPropertyName("raw")]
         public string? Raw { get; set; }
-        
+
         [JsonPropertyName("formdata")]
         public List<PostmanFormData>? FormData { get; set; }
-        
+
         [JsonPropertyName("urlencoded")]
         public List<PostmanUrlEncoded>? UrlEncoded { get; set; }
     }
@@ -87,10 +90,10 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("key")]
         public string? Key { get; set; }
-        
+
         [JsonPropertyName("value")]
         public string? Value { get; set; }
-        
+
         [JsonPropertyName("type")]
         public string? Type { get; set; }
     }
@@ -99,7 +102,7 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("key")]
         public string? Key { get; set; }
-        
+
         [JsonPropertyName("value")]
         public string? Value { get; set; }
     }
@@ -108,13 +111,13 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("raw")]
         public string? Raw { get; set; }
-        
+
         [JsonPropertyName("host")]
         public List<string>? Host { get; set; }
-        
+
         [JsonPropertyName("path")]
         public List<string>? Path { get; set; }
-        
+
         [JsonPropertyName("query")]
         public List<PostmanQuery>? Query { get; set; }
     }
@@ -123,7 +126,7 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("key")]
         public string? Key { get; set; }
-        
+
         [JsonPropertyName("value")]
         public string? Value { get; set; }
     }
@@ -132,7 +135,7 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("listen")]
         public string? Listen { get; set; }
-        
+
         [JsonPropertyName("script")]
         public PostmanScript? Script { get; set; }
     }
@@ -141,7 +144,7 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("exec")]
         public List<string>? Exec { get; set; }
-        
+
         [JsonPropertyName("type")]
         public string? Type { get; set; }
     }
@@ -150,10 +153,10 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("id")]
         public string? Id { get; set; }
-        
+
         [JsonPropertyName("name")]
         public string? Name { get; set; }
-        
+
         [JsonPropertyName("values")]
         public List<PostmanEnvironmentVariable>? Values { get; set; }
     }
@@ -162,11 +165,37 @@ namespace IntegrationTest.Postman.Framework.Models
     {
         [JsonPropertyName("key")]
         public string? Key { get; set; }
-        
+
         [JsonPropertyName("value")]
         public string? Value { get; set; }
-        
+
         [JsonPropertyName("enabled")]
         public bool Enabled { get; set; }
+    }
+    
+    public class PostmanAuth
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("bearer")]
+        public List<PostmanAuthParam> Bearer { get; set; }
+
+        [JsonPropertyName("basic")]
+        public List<PostmanAuthParam> Basic { get; set; }
+
+        // Add other auth types as needed
+    }
+
+    public class PostmanAuthParam
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
     }
 }
