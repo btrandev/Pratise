@@ -53,10 +53,10 @@ jobs:
     
     - name: Generate coverage report
       run: |
-        reportgenerator \
+        dotnet reportgenerator \
           -reports:./coverage-results/**/coverage.cobertura.xml \
           -targetdir:./coverage-report \
-          -reporttypes:HtmlInline_AzurePipelines;Cobertura
+          -reporttypes:Html
     
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
